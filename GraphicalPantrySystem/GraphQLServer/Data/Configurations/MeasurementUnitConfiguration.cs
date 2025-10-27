@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace GraphQLServer.Data.Configurations
 {
-    public class MeasurementUnitConfiguration : IEntityTypeConfiguration<Items>
+    public class MeasurementUnitConfiguration : IEntityTypeConfiguration<MeasurementUnits>
     {
-        public void Configure(EntityTypeBuilder<Items> builder)
+        public void Configure(EntityTypeBuilder<MeasurementUnits> builder)
         {
             builder.ToTable("MeasurementUnits", "blog");
 

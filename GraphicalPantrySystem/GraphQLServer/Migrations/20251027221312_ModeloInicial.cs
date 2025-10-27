@@ -16,12 +16,13 @@ namespace GraphQLServer.Migrations
 
             migrationBuilder.CreateTable(
                 name: "MeasurementUnits",
+                schema: "blog",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -29,23 +30,24 @@ namespace GraphQLServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MeasurementUnits",
+                name: "Items",
                 schema: "blog",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Quantity = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     MeasurementUnitId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MeasurementUnits", x => x.Id);
+                    table.PrimaryKey("PK_Items", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MeasurementUnits_MeasurementUnits_MeasurementUnitId",
+                        name: "FK_Items_MeasurementUnits_MeasurementUnitId",
                         column: x => x.MeasurementUnitId,
+                        principalSchema: "blog",
                         principalTable: "MeasurementUnits",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -65,10 +67,10 @@ namespace GraphQLServer.Migrations
                 {
                     table.PrimaryKey("PK_Inventories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Inventories_MeasurementUnits_ItemId",
+                        name: "FK_Inventories_Items_ItemId",
                         column: x => x.ItemId,
                         principalSchema: "blog",
-                        principalTable: "MeasurementUnits",
+                        principalTable: "Items",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -80,9 +82,9 @@ namespace GraphQLServer.Migrations
                 column: "ItemId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MeasurementUnits_MeasurementUnitId",
+                name: "IX_Items_MeasurementUnitId",
                 schema: "blog",
-                table: "MeasurementUnits",
+                table: "Items",
                 column: "MeasurementUnitId");
         }
 
@@ -94,11 +96,12 @@ namespace GraphQLServer.Migrations
                 schema: "blog");
 
             migrationBuilder.DropTable(
-                name: "MeasurementUnits",
+                name: "Items",
                 schema: "blog");
 
             migrationBuilder.DropTable(
-                name: "MeasurementUnits");
+                name: "MeasurementUnits",
+                schema: "blog");
         }
     }
 }

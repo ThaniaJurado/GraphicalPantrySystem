@@ -53,16 +53,16 @@ namespace GraphQLServer.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("MeasurementUnitId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("Quantity")
                         .HasPrecision(18, 2)
@@ -72,7 +72,7 @@ namespace GraphQLServer.Migrations
 
                     b.HasIndex("MeasurementUnitId");
 
-                    b.ToTable("MeasurementUnits", "blog");
+                    b.ToTable("Items", "blog");
                 });
 
             modelBuilder.Entity("GraphQLServer.Models.MeasurementUnits", b =>
@@ -85,15 +85,17 @@ namespace GraphQLServer.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("MeasurementUnits");
+                    b.ToTable("MeasurementUnits", "blog");
                 });
 
             modelBuilder.Entity("GraphQLServer.Models.Inventory", b =>

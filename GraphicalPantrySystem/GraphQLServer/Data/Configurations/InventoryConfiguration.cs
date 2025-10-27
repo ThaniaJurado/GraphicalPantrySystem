@@ -9,6 +9,7 @@ namespace GraphQLServer.Data.Configurations
         public void Configure(EntityTypeBuilder<Inventory> builder)
         {
             builder.ToTable("Inventories", "blog");
+
             builder.Property(u => u.ExpirationDate).IsRequired();
             builder.HasOne(typeof(Items), "Item").WithMany().HasForeignKey("ItemId");
         }

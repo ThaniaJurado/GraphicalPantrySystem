@@ -4,17 +4,21 @@ using GraphQLServer.MethodExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddGraphQLServer()
     .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
     .RegisterDbContextFactory<BlogContext>()
     .AddProjections()
     .AddFiltering()
-    .AddSorting();
+    .AddSorting()
+    .AddType<LocalDateType>();
 
-builder.Services.AddDbContext<BlogContext>(options =>
+// Register factory (IDbContextFactory<BlogContext>)
+builder.Services.AddDbContextFactory<BlogContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BlogConnection"),
     x => x.MigrationsHistoryTable(HistoryRepository.DefaultTableName, "blog")));
 

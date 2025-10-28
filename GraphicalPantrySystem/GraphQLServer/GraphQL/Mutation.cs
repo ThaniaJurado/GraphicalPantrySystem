@@ -30,5 +30,31 @@ namespace GraphQLServer.GraphQL
                 ExpirationDate = inventory.ExpirationDate
             };
         }
+
+        //This method is useful when you want to make a correction to an existing inventory record
+        public async Task<InventoryPayload> UpdateToInventory([Service] IDbContextFactory<BlogContext> dbFactory, int id, InventoryInputType inputInventory)
+        {
+            await using var context = await dbFactory.CreateDbContextAsync();
+
+            var inventory = new Inventory
+            {
+                Id = id,
+                ItemId = inputInventory.ItemId,
+                ExpirationDate = inputInventory.ExpirationDate
+            };
+
+            context.Inventories.Update(inventory);
+            await context.SaveChangesAsync();
+
+            var item = await context.Items.FindAsync(inventory.ItemId);
+
+            return new InventoryPayload
+            {
+                Id = inventory.Id,
+                ItemId = inventory.ItemId,
+                Item = item,
+                ExpirationDate = inventory.ExpirationDate
+            };
+        }
     }
 }

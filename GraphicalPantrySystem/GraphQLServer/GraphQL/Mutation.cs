@@ -101,5 +101,29 @@ namespace GraphQLServer.GraphQL
                 Description = measurementUnit.Description
             };
         }
+
+        public async Task<ItemPayload> AddToItems([Service] IDbContextFactory<BlogContext> dbFactory, ItemInputType inputItem)
+        {
+            await using var context = await dbFactory.CreateDbContextAsync();
+
+            var item = new Items
+            {
+                Name = inputItem.Name,
+                Quantity = inputItem.Quantity,
+                Description = inputItem.Description,
+                MeasurementUnitId = inputItem.MeasurementUnitId
+            };
+
+            await context.Items.AddAsync(item);
+            await context.SaveChangesAsync();
+
+            return new ItemPayload
+            {
+                Id = item.Id,
+                Quantity = item.Quantity,
+                Description = item.Description,
+                MeasurementUnitId = item.MeasurementUnitId
+            };
+        }
     }
 }

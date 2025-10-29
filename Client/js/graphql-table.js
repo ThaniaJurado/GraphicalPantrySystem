@@ -141,6 +141,7 @@ function inventoryTable() {
 
     // Register new item
     async registerNewItem() {
+        console.log("measurementunitis "+this.newItem.measurementUnitId);
         if (!this.newItem.name || !this.newItem.measurementUnitId) {
             this.error = 'Please complete all required fields';
             return;
@@ -150,32 +151,20 @@ function inventoryTable() {
         this.error = '';
 
         const mutation = `
-            mutation CreateItem($name: String!, $description: String, $quantity: Int!, $measurementUnitId: ID!) {
-                createItem(input: {
-                    name: $name,
-                    description: $description,
-                    quantity: $quantity,
-                    measurementUnitId: $measurementUnitId
-                }) {
-                    item {
-                        id
-                        name
-                        description
-                        quantity
-                        measurementUnit {
-                            id
-                            name
-                        }
-                    }
+mutation AddToItems($inputItem: ItemInputTypeInput!) {
+                addToItems(inputItem:  $inputItem) {
+                 id
                 }
             }
         `;
 
         const variables = {
-            name: this.newItem.name,
-            description: this.newItem.description || null,
-            quantity: parseInt(this.newItem.quantity),
-            measurementUnitId: this.newItem.measurementUnitId
+            inputItem: {
+                name: this.newItem.name,
+                description: this.newItem.description || null,
+                quantity: parseFloat(this.newItem.quantity),
+                measurementUnitId: parseInt(this.newItem.measurementUnitId)
+            }
         };
 
         try {
@@ -186,7 +175,7 @@ function inventoryTable() {
                 throw new Error(response.errors[0].message);
             }
 
-            console.log('✅ Item created successfully:', response.data.createItem.item);
+            console.log('✅ Item created successfully:', response.data.id);
             
             // Close form and reset
             this.showNewItemForm = false;

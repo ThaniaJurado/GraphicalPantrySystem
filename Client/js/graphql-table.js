@@ -1,23 +1,43 @@
 // GraphQL Table Component for Alpine.js
-console.log('🔄 Cargando graphql-table.js...');
+console.log('🔄 Loading graphql-table.js...');
 
-// Registrar componente de inventario directamente
+// Register inventory component directly
 function inventoryTable() {
-    console.log('🚀 Creando instancia de inventoryTable');
+    console.log('🚀 Creating inventoryTable instance');
     return {
         items: [],
         loading: false,
         error: '',
         
-        // Configuración del servidor GraphQL
+        // Properties for new item form
+        showNewItemForm: false,
+        registeringItem: false,
+        measurementUnits: [],
+        newItem: {
+            name: '',
+            description: '',
+            quantity: 0,
+            measurementUnitId: ''
+        },
+        
+        // Properties for new measurement unit form
+        showNewUnitForm: false,
+        registeringUnit: false,
+        newUnit: {
+            name: '',
+            description: ''
+        },
+        
+        // GraphQL server configuration
         graphqlEndpoint: 'https://localhost:5001/graphql/',
         
         init() {
-            console.log('🚀 Inicializando componente inventoryTable');
+            console.log('🚀 Initializing inventoryTable component');
             this.fetchInventory();
+            this.fetchMeasurementUnits();
         },
 
-    // Consulta GraphQL para obtener el inventario
+    // GraphQL query to get inventory
     async fetchInventory() {
         this.loading = true;
         this.error = '';
@@ -32,6 +52,7 @@ function inventoryTable() {
                     endCursor
                     }
                     nodes{
+                    id
                     expirationDate
                         item{
                             name
@@ -53,19 +74,215 @@ function inventoryTable() {
                 throw new Error(response.errors[0].message);
             }
             
-            // Extraer los items de la estructura correcta
+            // Extract items from the correct structure
             this.items = response.data.inventories?.nodes || [];
-            console.log('Items procesados:', this.items);
-            console.log(`📊 Se encontraron ${this.items.length} elementos en el inventario`);
+            console.log('Processed items:', this.items);
+            console.log(`📊 Found ${this.items.length} elements in inventory`);
         } catch (error) {
             console.error('Error fetching inventory:', error);
-            this.error = `Error al cargar el inventario: ${error.message}`;
+            this.error = `Error loading inventory: ${error.message}`;
         } finally {
             this.loading = false;
         }
     },
 
-    // Función para ejecutar consultas GraphQL
+    // GraphQL query to get measurement units
+    async fetchMeasurementUnits() {
+        const query = `
+          query GetMeasurementUnits{
+                measurementUnits{
+                    id
+                    name
+                    description
+                }
+            }
+        `;
+
+        try {
+            const response = await this.executeGraphQLQuery(query);
+            console.log('Measurement Units response:', response);
+            
+            if (response.errors) {
+                throw new Error(response.errors[0].message);
+            }
+            
+            this.measurementUnits = response.data.measurementUnits || [];
+            console.log('📏 Measurement units loaded:', this.measurementUnits);
+        } catch (error) {
+            console.error('Error fetching measurement units:', error);
+            this.error = `Error loading measurement units: ${error.message}`;
+        }
+    },
+
+    // Show/hide new item form
+    toggleNewItemForm() {
+        this.showNewItemForm = !this.showNewItemForm;
+        if (this.showNewItemForm) {
+            this.resetNewItemForm();
+        }
+    },
+
+    // Cancel new item
+    cancelNewItem() {
+        this.showNewItemForm = false;
+        this.resetNewItemForm();
+    },
+
+    // Reset new item form
+    resetNewItemForm() {
+        this.newItem = {
+            name: '',
+            description: '',
+            quantity: 0,
+            measurementUnitId: ''
+        };
+        this.error = '';
+    },
+
+    // Register new item
+    async registerNewItem() {
+        if (!this.newItem.name || !this.newItem.measurementUnitId) {
+            this.error = 'Please complete all required fields';
+            return;
+        }
+
+        this.registeringItem = true;
+        this.error = '';
+
+        const mutation = `
+            mutation CreateItem($name: String!, $description: String, $quantity: Int!, $measurementUnitId: ID!) {
+                createItem(input: {
+                    name: $name,
+                    description: $description,
+                    quantity: $quantity,
+                    measurementUnitId: $measurementUnitId
+                }) {
+                    item {
+                        id
+                        name
+                        description
+                        quantity
+                        measurementUnit {
+                            id
+                            name
+                        }
+                    }
+                }
+            }
+        `;
+
+        const variables = {
+            name: this.newItem.name,
+            description: this.newItem.description || null,
+            quantity: parseInt(this.newItem.quantity),
+            measurementUnitId: this.newItem.measurementUnitId
+        };
+
+        try {
+            const response = await this.executeGraphQLQuery(mutation, variables);
+            console.log('Create item response:', response);
+            
+            if (response.errors) {
+                throw new Error(response.errors[0].message);
+            }
+
+            console.log('✅ Item created successfully:', response.data.createItem.item);
+            
+            // Close form and reset
+            this.showNewItemForm = false;
+            this.resetNewItemForm();
+            
+            // Optional: update inventory list
+            // this.fetchInventory();
+            
+            // Show success message (optional)
+            alert('Item registered successfully!');
+            
+        } catch (error) {
+            console.error('Error registering item:', error);
+            this.error = `Error registering item: ${error.message}`;
+        } finally {
+            this.registeringItem = false;
+        }
+    },
+
+    // Show/hide new measurement unit form
+    toggleNewUnitForm() {
+        this.showNewUnitForm = !this.showNewUnitForm;
+        if (this.showNewUnitForm) {
+            this.resetNewUnitForm();
+        }
+    },
+
+    // Cancel new measurement unit
+    cancelNewUnit() {
+        this.showNewUnitForm = false;
+        this.resetNewUnitForm();
+    },
+
+    // Reset new measurement unit form
+    resetNewUnitForm() {
+        this.newUnit = {
+            name: '',
+            description: ''
+        };
+        this.error = '';
+    },
+
+    // Register new measurement unit
+    async registerNewUnit() {
+        if (!this.newUnit.name) {
+            this.error = 'Please enter the measurement unit name';
+            return;
+        }
+
+        this.registeringUnit = true;
+        this.error = '';
+
+        const mutation = `
+            mutation AddToMeasurementUnits($inputMeasurementUnit: MeasurementUnitInputTypeInput!) {
+                addToMeasurementUnits(inputMeasurementUnit:  $inputMeasurementUnit) {
+                 id
+                }
+            }
+        `;
+
+        const variables = {
+            inputMeasurementUnit: {
+                name: this.newUnit.name,
+                description: this.newUnit.description || null
+            }
+        };
+
+        try {
+            const response = await this.executeGraphQLQuery(mutation, variables);
+            console.log('Create measurement unit response:', response);
+            
+            if (response.errors) {
+                throw new Error(response.errors[0].message);
+            }
+
+            console.log('✅ Measurement unit created successfully:', response.data.id);
+            
+            // Close form and reset
+            this.showNewUnitForm = false;
+            this.resetNewUnitForm();
+            
+            // Update measurement units list
+            await this.fetchMeasurementUnits();
+            
+            // Show success message
+            alert('Measurement unit added successfully!');
+            
+        } catch (error) {
+            console.error('Error registering measurement unit:', error);
+            this.error = `Error adding measurement unit: ${error.message}`;
+        } finally {
+            this.registeringUnit = false;
+        }
+    },
+
+    // Function to execute GraphQL queries
     async executeGraphQLQuery(query, variables = {}) {
         const response = await fetch(this.graphqlEndpoint, {
             method: 'POST',
@@ -91,7 +308,7 @@ function inventoryTable() {
         if (!dateString) return 'N/A';
         
         const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
+        return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
@@ -100,11 +317,11 @@ function inventoryTable() {
         });
     },
 
-    // Función para editar un elemento
+    // Function to edit an item
     async editItem(item) {
-        console.log('Editando item:', item);
+        console.log('Editing item:', item);
         
-        const newQuantity = prompt(`Nueva cantidad para ${item.item.name}:`, item.item.quantity);
+        const newQuantity = prompt(`New quantity for ${item.item.name}:`, item.item.quantity);
         
         if (newQuantity !== null && !isNaN(newQuantity)) {
             await this.updateItemQuantity(item.id, parseInt(newQuantity));
@@ -140,18 +357,18 @@ function inventoryTable() {
                 this.items[index] = updatedItem;
             }
             
-            console.log('Item actualizado exitosamente');
+            console.log('Item updated successfully');
         } catch (error) {
             console.error('Error updating item:', error);
-            this.error = `Error al actualizar el item: ${error.message}`;
+            this.error = `Error updating item: ${error.message}`;
         } finally {
             this.loading = false;
         }
     },
 
-    // Función para eliminar un elemento
+    // Function to delete an item
     async deleteItem(id) {
-        if (!confirm('¿Estás seguro de que quieres eliminar este elemento?')) {
+        if (!confirm('Are you sure you want to delete this item?')) {
             return;
         }
 
@@ -175,10 +392,10 @@ function inventoryTable() {
 
             this.items = this.items.filter(item => item.id !== id);
             
-            console.log('Item eliminado exitosamente');
+            console.log('Item deleted successfully');
         } catch (error) {
             console.error('Error deleting item:', error);
-            this.error = `Error al eliminar el item: ${error.message}`;
+            this.error = `Error deleting item: ${error.message}`;
         } finally {
             this.loading = false;
         }
@@ -186,6 +403,6 @@ function inventoryTable() {
     };
 }
 
-// Hacer la función disponible globalmente
+// Make function globally available
 window.inventoryTable = inventoryTable;
-console.log('📋 Función inventoryTable registrada globalmente');
+console.log('📋 inventoryTable function registered globally');

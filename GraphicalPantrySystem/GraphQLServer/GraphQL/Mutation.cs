@@ -80,5 +80,26 @@ namespace GraphQLServer.GraphQL
                 return false;
             }
         }
+
+        public async Task<MeasurementUnitPayload> AddToMeasurementUnits([Service] IDbContextFactory<BlogContext> dbFactory, MeasurementUnitInputType inputMeasurementUnit)
+        {
+            await using var context = await dbFactory.CreateDbContextAsync();
+
+            var measurementUnit = new MeasurementUnits
+            {
+                Name = inputMeasurementUnit.Name,
+                Description = inputMeasurementUnit.Description
+            };
+
+            await context.MeasurementUnits.AddAsync(measurementUnit);
+            await context.SaveChangesAsync();
+
+            return new MeasurementUnitPayload
+            {
+                Id = measurementUnit.Id,
+                Name = measurementUnit.Name,
+                Description = measurementUnit.Description
+            };
+        }
     }
 }

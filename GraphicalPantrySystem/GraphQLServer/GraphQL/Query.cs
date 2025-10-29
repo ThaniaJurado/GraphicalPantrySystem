@@ -19,5 +19,13 @@ namespace GraphQLServer.GraphQL
         [UseProjection]
         public IQueryable<Inventory?> GetInventory([Service] BlogContext context, int id)
             => context.Inventories.Where(u => u.Id == id);
+
+        [UseProjection]
+        public IQueryable<Items> GetItems([Service] BlogContext context) =>
+        context.Items;
+
+        [UseProjection]
+        public IQueryable<MeasurementUnits> GetMeasurementUnits([Service] BlogContext context) =>
+      context.MeasurementUnits;
     }
 }

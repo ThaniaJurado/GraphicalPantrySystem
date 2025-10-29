@@ -83,3 +83,34 @@ body{margin-bottom: 60px;}
         padding: 0.25rem 0.5rem;
     }
 }
+
+/* Estilos para el formulario de nuevo item */
+.card {
+    border: 1px solid #dee2e6;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Animaciones para transiciones suaves */
+[x-cloak] {
+    display: none !important;
+}
+
+.gap-2 {
+    gap: 0.5rem !important;
+}
